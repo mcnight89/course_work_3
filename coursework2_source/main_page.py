@@ -1,8 +1,15 @@
-from flask import Flask, render_template, request, Flask
-import json
+from flask import render_template, request, Flask
+
+from coursework2_source.api.views import api_blueprint
+from logs import loggings
 import utils
 
 app = Flask(__name__, template_folder='templates')
+app.config['JSON_AS_ASCII'] = False
+
+loggings.create_logger()
+
+app.register_blueprint(api_blueprint)
 
 
 @app.route('/')
@@ -34,4 +41,15 @@ def username_posts(user_name):
     return render_template('user-feed.html', posts=posts, user_name=user_name)
 
 
-app.run(debug=True)
+@app.errorhandler(404)
+def page_error_404(error):
+    return f"Такой страницы нет {error}", 404
+
+
+@app.errorhandler(500)
+def page_error_500(error):
+    return f"На сервере ошибка - {error}", 500
+
+
+if __name__ == "__main__":
+    app.run()
